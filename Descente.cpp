@@ -7,6 +7,14 @@
 //arguments du programme dans les propriétés du projet - débogage - arguements.
 //Sinon, utiliser le répertoire execution.
 
+// Permet de calculer le pas
+#define FRACTION 3
+// Nombre de test d'insertion avant la position actuelle
+#define BEFORE 3
+// Nombre de test d'insertion après la position actuelle
+#define AFTER 3
+
+
 //*****************************************************************************************
 // Prototype des fonctions se trouvant dans la DLL 
 //*****************************************************************************************
@@ -69,7 +77,7 @@ int main(int NbParam, char *Param[])
 	NomFichier.assign(Param[1]);
 	LAlgo.NB_EVAL_MAX= atoi(Param[2]);
 
-	//**Lecture du fichier de donnees
+	//**Lecture du fichier de donnees'
 	LectureProbleme(NomFichier, LeProb, LAlgo);
 	//AfficherProbleme(LeProb);
 	
@@ -85,7 +93,8 @@ int main(int NbParam, char *Param[])
 		if (Next.FctObj <= Courante.FctObj)	//**amélioration
 		{
 				Courante = Next;
-				cout << "Fct Obj Nouvelle Courante: " << Courante.FctObj << endl;
+
+// 				cout << "Fct Obj Nouvelle Courante: " << Courante.FctObj << endl;
 //  				AfficherSolution(Courante, LeProb, "NouvelleCourante: ", true);
 		}
 	}while (LAlgo.CptEval < LAlgo.NB_EVAL_MAX && Courante.FctObj!=0);
@@ -95,7 +104,7 @@ int main(int NbParam, char *Param[])
 	
 	LibererMemoireFinPgm(Courante, Next, Best, LeProb);
 
-	system("PAUSE");
+ 	system("PAUSE");
 	return 0;
 }
 
@@ -148,12 +157,34 @@ TSolution createTempSolution(const TSolution uneSol, int posA, int pos, TProblem
 	TSolution copie;
 	CopierSolution(uneSol, copie, unProb);
 
+/*
 	for (int i = posA; i < pos - 1; i++)
 	{
 		copie.Seq[i] = copie.Seq[i + 1];
 	}
-
 	copie.Seq[pos - 1] = uneSol.Seq[posA];
+*/
+
+	for (int i = 0; i < unProb.NbCom; i++)
+	{
+		if (i == pos)
+		{
+			copie.Seq[i] = uneSol.Seq[posA];
+		}
+		else if (i > pos && i <= posA)
+		{
+			copie.Seq[i] = uneSol.Seq[i - 1];
+		}
+		else if (i < pos && i >= posA)
+		{
+			copie.Seq[i] = uneSol.Seq[i + 1];
+		}
+		else
+		{
+			copie.Seq[i] = uneSol.Seq[i];
+		}
+	}
+
 
 	return copie;
 }
@@ -178,15 +209,29 @@ TSolution Insertion(const TSolution uneSol, const TProblem unProb, TAlgo &unAlgo
 
 	CopierSolution(uneSol, bestTmpSol, unProb);
 
-	posA = rand() % (unProb.NbCom / 2);
+	posA = rand() % unProb.NbCom;
 	posPred = posA;
 
 	int i = 0;
-	while (posPred < unProb.NbCom && i < 5)
+	while (posPred >= 0 && i < BEFORE)
 	{
-		posPred = posPred + rand() % (unProb.NbCom / 3) + 1;
+		posPred = posPred - rand() % (unProb.NbCom / FRACTION) - 1;
 
-		if (posPred <= unProb.NbCom)
+		if (posPred > 0)
+		{
+			posSol.push_back(posPred);
+		}
+
+		i++;
+	}
+
+	i = 0;
+	posPred = posA;
+	while (posPred < unProb.NbCom && i < AFTER)
+	{
+		posPred = posPred + rand() % (unProb.NbCom / FRACTION) + 1;
+
+		if (posPred < unProb.NbCom)
 		{
 			posSol.push_back(posPred);
 		}
